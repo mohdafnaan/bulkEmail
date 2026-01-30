@@ -14,7 +14,7 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ msg: "user already exists" });
     }
     let bPass = await bcrypt.hash(password, 10);
-    let emailOtp = Math.floor(Math.random() * (9999 - 1000) + 1000);
+    let emailOtp = Math.floor(Math.random() * (999999 - 100000) + 100000);
 
     await sendMail(
       email,
@@ -58,9 +58,9 @@ router.post("/login",async (req,res)=>{
     let {email , password} = req.body;
     let user = await userModel.findOne({email});
     if(!user){
-      return res.status(400).json({msg : "user does not exists"})
+      return res.status(400).json({msg: "user not found"})
     }
-    let comparePassword  =  bcrypt.compare(password,user.password);
+    let comparePassword  = await bcrypt.compare(password,user.password);
     if(!comparePassword){
       return res.status(400).json({msg : "invalid credentials"})
     }
@@ -73,7 +73,7 @@ router.post("/login",async (req,res)=>{
     res.status(200).json({msg : "login sucessfully",token})
   } catch (error) {
     console.log(error)
-    res.status(500).json(error)
+    res.status(500).json({msg:"error krdiya"})
   }
 })
 export default router;

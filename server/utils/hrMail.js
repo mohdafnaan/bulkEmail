@@ -41,7 +41,7 @@ async function sendMailToHr() {
       { email: user.email },
       { $set: { resumeSent: true, resumeSentAt: new Date() } },
     );
-    console.log(`email sent`);
+    console.log(`email sent to hr`,sender.messageId);
   } catch (error) {
     console.log(error);
   }
