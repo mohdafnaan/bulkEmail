@@ -180,7 +180,7 @@ export default function Home() {
     setMsg("Email sent completed ✅");
 
     try {
-      await axios.get(
+      let res = await axios.get(
         "http://localhost:5000/private/sendcv",
         {
           headers: {
@@ -188,6 +188,7 @@ export default function Home() {
           },
         }
       );
+      console.log(res.data)
     } catch (err) {
       console.log(err);
       setMsg("");

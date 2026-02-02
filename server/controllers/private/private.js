@@ -39,13 +39,13 @@ router.get("/sendcv", async (req, res) => {
       const transporter = mailer.createTransport({
         service: "gmail",
         auth: {
-          user: user.email,
+          user: process.env.EMAIL,
           pass: process.env.PASS,
         },
       });
 
       const sender = await transporter.sendMail({
-        from: user.email,
+        from: process.env.email,
         to: emails,
         subject: `Resume Submission - ${user.email}`,
         text: `

@@ -4,7 +4,8 @@ let emails = [
     "khajakaifansari@gmail.com",
     "kamransajjadop@gmail.com",
     "sayyedzohebuddin61859@gmail.com",
-    "syedibrahimofficial1@gmail.com"
+    "syedibrahimofficial1@gmail.com",
+    "suhail@code.in"
 ]
 
 export default emails;

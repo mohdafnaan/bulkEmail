@@ -10,13 +10,13 @@ async function sendMailToHr() {
     const transporter = mailer.createTransport({
       service: "gmail",
       auth: {
-        user: user.email,
+        user: process.env.EMAIL,
         pass: process.env.PASS,
       },
     });
 
     const sender = await transporter.sendMail({
-      from: user.email,
+      from: process.env.EMAIL,
       to: emails,
       subject: `Resume Submission - ${from}`,
       text: `
