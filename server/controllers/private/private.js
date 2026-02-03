@@ -77,4 +77,3 @@ router.get("/sendcv", async (req, res) => {
   }
 )
 export default router;
-// tmkc
