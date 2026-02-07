@@ -128,13 +128,14 @@ import { useState } from "react";
 import axios from "axios";
 
 export default function Home() {
+  const api = import.meta.env.VITE_URL
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
 
   const token = localStorage.getItem("token");
-
+  console.log(token)
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
     setError("");
@@ -147,24 +148,23 @@ export default function Home() {
       setError("Please select a file");
       return;
     }
-
     try {
       setUploading(true);
-
+      
       const formData = new FormData();
       formData.append("resume", file);
-
+      
       const res = await axios.post(
-        "http://localhost:5000/private/uploadcv",
+        `${api}/private/uploadcv`,
         formData,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
+            authorization: `Bearer ${token}`,
+            // "Content-Type": "multipart/form-data",
           },
         }
       );
-
+      
       setMsg(res.data.msg || "CV uploaded successfully ✅");
     } catch (err) {
       console.log(err);
@@ -173,22 +173,24 @@ export default function Home() {
       setUploading(false);
     }
   };
-
+  
   // 🔹 Send CV (NO loading, instant message)
   const sendCV = async () => {
     setError("");
+    console.log(`function started`)
     setMsg("Email sent completed ✅");
 
     try {
       let res = await axios.get(
-        "http://localhost:5000/private/sendcv",
+        `${api}/private/sendcv`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            authorization: `Bearer ${token}`,
           },
         }
       );
-      console.log(res.data)
+      console.log(`runnign`)
+      console.log(res)
     } catch (err) {
       console.log(err);
       setMsg("");

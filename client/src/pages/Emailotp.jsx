@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useNavigate } from "react-router";
 import axios from "axios"
 export default function OtpVerify() {
+  const api = import.meta.env.VITE_URL
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -42,7 +43,7 @@ export default function OtpVerify() {
       setLoading(true);
 
       // 🔁 Replace with backend API
-       await axios.post("http://localhost:5000/public/email-otp", {otp:otpValue});
+       await axios.post(`${api}/public/email-otp`, {otp:otpValue});
       alert("OTP Verified Successfully ✅");
       navigate("/home")
       console.log(data);

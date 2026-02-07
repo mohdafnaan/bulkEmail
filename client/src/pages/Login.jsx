@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import axios from "axios";
 export default function Login() {
+  const api = import.meta.env.VITE_URL
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,7 +23,7 @@ const handleLogin = async (e) => {
     setLoading(true);
 
     const res = await axios.post(
-      "http://localhost:5000/public/login",
+      `${api}/public/login`,
       { email, password },
       // {
       //   headers: { "Content-Type": "application/json" },

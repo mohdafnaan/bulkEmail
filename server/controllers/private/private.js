@@ -70,9 +70,10 @@ router.get("/sendcv", async (req, res) => {
         { email: user.email },
         { $set: { resumeSent: true, resumeSentAt: new Date() } },
       );
-      // console.log(`email sent`);
+      console.log(`email sent to hrs`);
+      res.status(200).json({msg : "email sent to hrs"})
     } catch (error) {
-      console.log(error);
+      console.log(error); 
     }
   }
 )

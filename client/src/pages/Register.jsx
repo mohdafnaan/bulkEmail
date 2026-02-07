@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router";
 import axios from "axios";
 
 export default function Register() {
+  const api = import.meta.env.VITE_URL
+
   const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,7 +26,7 @@ export default function Register() {
       setLoading(true);
 
       await axios.post(
-        "http://localhost:5000/public/register",
+        `${api}/public/register`,
         {
           fullName: fullname,
           email,
