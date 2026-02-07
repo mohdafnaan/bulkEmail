@@ -8,13 +8,15 @@ import sendMailToHr from "../../utils/hrMail.js";
 import emails from "../../utils/listofmails.js";
 
 const router = express.Router();
+
 router.post("/uploadcv", upload.single("resume"), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ msg: "No file uploaded" });
+      return res.status(400).json({ msg: "No file uploaded or invalid file type" });
     }
     const user = req.user;
-    await userModel.updateOne(
+    // console.log(user)
+    const updateResult = await userModel.updateOne(
       { email: user.email },
       {
         $set: {
@@ -24,10 +26,15 @@ router.post("/uploadcv", upload.single("resume"), async (req, res) => {
         },
       },
     );
-    res.status(200).json({ msg: "CV uploaded", file: req.file });
+    
+    if (updateResult.matchedCount === 0) {
+        return res.status(404).json({ msg: "User not found to update" });
+    }
+
+    res.status(200).json({ msg: "CV uploaded successfully", file: req.file });
   } catch (error) {
-    console.log(error);
-    res.status(500).json(error);
+    console.log("Upload error:", error);
+    res.status(500).json({ msg: "Server error during upload", error: error.message });
   }
 });
 
@@ -35,7 +42,17 @@ router.get("/sendcv", async (req, res) => {
     try {
       const lUser = req.user;
       const user = await userModel.findOne({email : lUser.email})
-      console.log(user)
+      
+      if (!user) {
+        return res.status(404).json({ msg: "User not found" });
+      }
+
+      if (!user.resume || !user.resume.filePath) {
+        return res.status(400).json({ msg: "No resume found. Please upload one first." });
+      }
+
+      console.log(`Sending email for user: ${user.email}`);
+
       const transporter = mailer.createTransport({
         service: "gmail",
         auth: {
@@ -45,19 +62,19 @@ router.get("/sendcv", async (req, res) => {
       });
 
       const sender = await transporter.sendMail({
-        from: process.env.email,
-        to: emails,
+        from: process.env.EMAIL,
+        to: emails, 
         subject: `Resume Submission - ${user.email}`,
         text: `
         Hello Team,
 
         please find attached my resume.
 
-        Name : ${user.fullName}
+        Name : ${user.fullName || "Candidate"}
         Email : ${user.email}
 
         Regards,
-        ${user.fullName}
+        ${user.fullName || "Candidate"}
         `,
         attachments: [
           {
@@ -66,14 +83,17 @@ router.get("/sendcv", async (req, res) => {
           },
         ],
       });
+      
       await userModel.updateOne(
         { email: user.email },
         { $set: { resumeSent: true, resumeSentAt: new Date() } },
       );
-      console.log(`email sent to hrs`);
-      res.status(200).json({msg : "email sent to hrs"})
+      
+      console.log(`Email sent successfully to HRs`);
+      res.status(200).json({msg : "Email sent successfully to HRs"})
     } catch (error) {
-      console.log(error); 
+      console.log("Send CV error:", error); 
+      res.status(500).json({ msg: "Failed to send email", error: error.message });
     }
   }
 )
