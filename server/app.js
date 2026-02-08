@@ -18,9 +18,9 @@ import privateUserRouter from "./controllers/private/private.js";
 
 const app = express();
 app.use(express.json());
-app.use(express.static(buildPath));
 const port = process.env.PORT;
 const buildPath = path.join(__dirname, "dist");
+app.use(express.static(buildPath));
 
 // let corsObject = {
 //   origin: ["http://localhost:5173","https://cvuploader.afnaan.in"],
