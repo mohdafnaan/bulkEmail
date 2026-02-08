@@ -4,6 +4,7 @@ dotenv.config();
 
 import path from "path";
 import { fileURLToPath } from "url";
+import cors from "cors";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,6 +20,9 @@ import privateUserRouter from "./controllers/private/private.js";
 import middleware from "./auth/auth.js";
 
 const app = express();
+
+// Enable CORS for all origins
+app.use(cors());
 
 app.use(express.json());
 
@@ -52,6 +56,6 @@ app.get("*", (req, res) => {
 
 
 // Start server
-app.listen(port, () => {
-  console.log(`Server is live at http://localhost:${port}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server is live at http://0.0.0.0:${port}`);
 });
