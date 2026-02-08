@@ -27,7 +27,7 @@ app.use(express.static(buildPath));
 //   methods: ["GET", "POST", "PUT", "DELETE"],
 // };
 
-app.use(cors(corsObject));
+// app.use(cors(corsObject));
 app.get("*", (req, res) => {
   res.sendFile(path.join(buildPath, "index.html"));
 });
