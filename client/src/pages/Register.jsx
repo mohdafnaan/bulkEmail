@@ -3,14 +3,12 @@ import { Link, useNavigate } from "react-router";
 import axios from "axios";
 
 export default function Register() {
-  const api = import.meta.env.VITE_URL
-
+  const api = import.meta.env.VITE_URL;
   const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
@@ -22,117 +20,147 @@ export default function Register() {
       return;
     }
 
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
     try {
       setLoading(true);
 
-      await axios.post(
-        `${api}/public/register`,
-        {
-          fullName: fullname,
-          email,
-          password,
-        }
-      );
+      await axios.post(`${api}/public/register`, {
+        fullName: fullname,
+        email,
+        password,
+      });
 
-      alert("Account created successfully ✅");
       navigate("/otp-verify");
-
     } catch (err) {
-      setError(err.response?.data?.msg || err.message);
+      console.error("Registration error:", err);
+      setError(err.response?.data?.msg || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
-      {/* Background Glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#0f172a_0%,transparent_70%)] opacity-40" />
+    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
+      {/* Premium Background Effects */}
+      <div className="bg-glow" />
+      <div className="bg-glow-accent bottom-[20%] left-[20%]" />
 
-      {/* Card */}
-      <div className="relative z-10 w-[380px] bg-zinc-900/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-zinc-800">
-
-        {/* Logo */}
-        <div className="flex justify-center mb-4">
-          <div className="w-12 h-12 rounded-full border-2 border-blue-500 flex items-center justify-center">
-            <div className="w-4 h-4 rounded-full bg-blue-500" />
+      {/* Main Card */}
+      <div className="w-full max-w-md animate-fade-in">
+        {/* Header */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600/10 border border-indigo-600/20 mb-6 group transition-all duration-500 hover:-rotate-6">
+            <svg className="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
           </div>
+          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Create Account</h1>
+          <p className="text-zinc-500 text-sm font-light">
+            Join the community and start applying
+          </p>
         </div>
 
-        <h2 className="text-white text-2xl font-semibold text-center">
-          Create Account
-        </h2>
+        {/* Form Card */}
+        <div className="glass-card rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-600 to-blue-600" />
+          
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 animate-slide-in">
+              <p className="text-red-400 text-sm flex items-center gap-3">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                {error}
+              </p>
+            </div>
+          )}
 
-        <p className="text-zinc-400 text-sm text-center mt-1">
-          Already have an account?{" "}
-          <Link to="/" className="text-blue-500">
-            Login
-          </Link>
-        </p>
+          {/* Form */}
+          <form onSubmit={handleRegister} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-widest ml-1">
+                Full Name
+              </label>
+              <input
+                type="text"
+                placeholder="John Doe"
+                value={fullname}
+                onChange={(e) => setFullname(e.target.value)}
+                className="w-full px-5 py-4 rounded-xl bg-zinc-900/50 border border-white/5 text-white placeholder-zinc-600 focus:border-indigo-600 transition-all duration-300"
+                disabled={loading}
+              />
+            </div>
 
-        {/* Error */}
-        {error && (
-          <p className="text-red-500 text-sm mt-4 text-center">{error}</p>
-        )}
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-widest ml-1">
+                Email Address
+              </label>
+              <input
+                type="email"
+                placeholder="name@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-5 py-4 rounded-xl bg-zinc-900/50 border border-white/5 text-white placeholder-zinc-600 focus:border-indigo-600 transition-all duration-300"
+                disabled={loading}
+              />
+            </div>
 
-        {/* Form */}
-        <form onSubmit={handleRegister} className="mt-6 space-y-4">
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-widest ml-1">
+                Password
+              </label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-5 py-4 rounded-xl bg-zinc-900/50 border border-white/5 text-white placeholder-zinc-600 focus:border-indigo-600 transition-all duration-300"
+                disabled={loading}
+              />
+              <p className="text-[10px] text-zinc-600 ml-1 font-medium italic">Minimum 6 characters required</p>
+            </div>
 
-          <input
-            type="text"
-            placeholder="Full name"
-            value={fullname}
-            onChange={(e) => setFullname(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg bg-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-4 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm tracking-wide shadow-lg shadow-indigo-900/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed btn-glow uppercase"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Initializing...
+                </span>
+              ) : (
+                "Get Started"
+              )}
+            </button>
+          </form>
 
-          <input
-            type="email"
-            placeholder="Email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg bg-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          {/* Divider */}
+          <div className="flex items-center gap-4 my-8">
+            <div className="flex-1 h-px bg-white/5" />
+            <span className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">Entry</span>
+            <div className="flex-1 h-px bg-white/5" />
+          </div>
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg bg-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 transition text-white font-medium disabled:opacity-50"
-          >
-            {loading ? "Creating account..." : "Register"}
-          </button>
-
-        </form>
-
-        {/* Divider */}
-        <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-zinc-700" />
-          <span className="text-zinc-500 text-xs">OR</span>
-          <div className="flex-1 h-px bg-zinc-700" />
+          {/* Sign In Link */}
+          <p className="text-center text-sm text-zinc-500 font-light">
+            Already registered?{" "}
+            <Link to="/" className="text-indigo-500 hover:text-indigo-400 font-semibold transition-colors duration-300">
+              Sign in
+            </Link>
+          </p>
         </div>
-
-        {/* Social Buttons */}
-        <div className="flex gap-3">
-          <button className="flex-1 py-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white text-lg">
-            
-          </button>
-          <button className="flex-1 py-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold">
-            G
-          </button>
-          <button className="flex-1 py-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white">
-            𝕏
-          </button>
-        </div>
-
       </div>
     </div>
   );
 }
+

@@ -11,11 +11,14 @@ const router = express.Router();
 
 router.post("/uploadcv", upload.single("resume"), async (req, res) => {
   try {
+    // Check if file was uploaded
     if (!req.file) {
       return res.status(400).json({ msg: "No file uploaded or invalid file type" });
     }
+
     const user = req.user;
-    // console.log(user)
+
+    // Update user with resume details
     const updateResult = await userModel.updateOne(
       { email: user.email },
       {
@@ -23,78 +26,107 @@ router.post("/uploadcv", upload.single("resume"), async (req, res) => {
           "resume.fileName": req.file.filename,
           "resume.filePath": req.file.path,
           "resume.fileType": req.file.mimetype,
+          "resume.uploadedAt": new Date(),
         },
       },
     );
-    
+
     if (updateResult.matchedCount === 0) {
-        return res.status(404).json({ msg: "User not found to update" });
+      return res.status(404).json({ msg: "User not found" });
     }
 
-    res.status(200).json({ msg: "CV uploaded successfully", file: req.file });
+    res.status(200).json({ 
+      msg: "Resume uploaded successfully", 
+      file: {
+        name: req.file.filename,
+        size: req.file.size,
+        type: req.file.mimetype
+      }
+    });
   } catch (error) {
-    console.log("Upload error:", error);
-    res.status(500).json({ msg: "Server error during upload", error: error.message });
+    console.error("Upload error:", error);
+    
+    // Handle multer errors
+    if (error.message === "Only PDF, DOC, and DOCX files are allowed") {
+      return res.status(400).json({ msg: error.message });
+    }
+    
+    if (error.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({ msg: "File size exceeds 5MB limit" });
+    }
+    
+    res.status(500).json({ msg: "Upload failed. Please try again." });
   }
 });
 
 router.get("/sendcv", async (req, res) => {
-    try {
-      const lUser = req.user;
-      const user = await userModel.findOne({email : lUser.email})
-      
-      if (!user) {
-        return res.status(404).json({ msg: "User not found" });
-      }
-
-      if (!user.resume || !user.resume.filePath) {
-        return res.status(400).json({ msg: "No resume found. Please upload one first." });
-      }
-
-      console.log(`Sending email for user: ${user.email}`);
-
-      const transporter = mailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL,
-          pass: process.env.PASS,
-        },
-      });
-
-      const sender = await transporter.sendMail({
-        from: process.env.EMAIL,
-        to: emails, 
-        subject: `Resume Submission - ${user.email}`,
-        text: `
-        Hello Team,
-
-        please find attached my resume.
-
-        Name : ${user.fullName || "Candidate"}
-        Email : ${user.email}
-
-        Regards,
-        ${user.fullName || "Candidate"}
-        `,
-        attachments: [
-          {
-            filename: user.resume.fileName,
-            path: user.resume.filePath,
-          },
-        ],
-      });
-      
-      await userModel.updateOne(
-        { email: user.email },
-        { $set: { resumeSent: true, resumeSentAt: new Date() } },
-      );
-      
-      console.log(`Email sent successfully to HRs`);
-      res.status(200).json({msg : "Email sent successfully to HRs"})
-    } catch (error) {
-      console.log("Send CV error:", error); 
-      res.status(500).json({ msg: "Failed to send email", error: error.message });
+  try {
+    const lUser = req.user;
+    
+    // Find user
+    const user = await userModel.findOne({ email: lUser.email });
+    
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
     }
+
+    // Check if resume exists
+    if (!user.resume || !user.resume.filePath) {
+      return res.status(400).json({ msg: "No resume found. Please upload your resume first." });
+    }
+
+    // Create email transporter
+    const transporter = mailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.PASS,
+      },
+    });
+
+    // Send email with resume attachment
+    await transporter.sendMail({
+      from: process.env.EMAIL,
+      to: emails,
+      subject: `Resume Submission - ${user.fullName}`,
+      text: `Hello HR Team,
+
+Please find attached the resume for your review.
+
+Candidate Details:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Name: ${user.fullName}
+Email: ${user.email}
+Submitted: ${new Date().toLocaleString()}
+
+Thank you for your consideration.
+
+Best regards,
+${user.fullName}`,
+      attachments: [
+        {
+          filename: user.resume.fileName,
+          path: user.resume.filePath,
+        },
+      ],
+    });
+    
+    // Update user record
+    await userModel.updateOne(
+      { email: user.email },
+      { 
+        $set: { 
+          resumeSent: true, 
+          resumeSentAt: new Date() 
+        } 
+      },
+    );
+    
+    console.log(`Resume sent successfully for: ${user.email}`);
+    res.status(200).json({ msg: "Resume sent successfully to HR team!" });
+  } catch (error) {
+    console.error("Send CV error:", error);
+    res.status(500).json({ msg: "Failed to send resume. Please try again." });
   }
-)
+});
 export default router;

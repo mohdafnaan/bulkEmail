@@ -1,130 +1,147 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import axios from "axios";
+
 export default function Login() {
-  const api = import.meta.env.VITE_URL
+  const api = import.meta.env.VITE_URL;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success,setSuccess] = useState("")
   const navigate = useNavigate();
 
-const handleLogin = async (e) => {
-  e.preventDefault();
-  setError("");
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
 
-  if (!email || !password) {
-    setError("Email and password are required");
-    return;
-  }
+    if (!email || !password) {
+      setError("Email and password are required");
+      return;
+    }
 
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const res = await axios.post(
-      `${api}/public/login`,
-      { email, password },
-      // {
-      //   headers: { "Content-Type": "application/json" },
-      // }
-    );
+      const res = await axios.post(
+        `${api}/public/login`,
+        { email, password }
+      );
 
-    console.log("SUCCESS:", res.data);
-    localStorage.setItem("token",res.data.token)
-    
-    navigate("/home");
-
-  } catch (err) {
-    console.log("ERROR:", err.response?.data);
-    setError(err.response?.data?.msg || "Invalid credentials");
-  } finally {
-    setLoading(false);
-  }
-};
-
-
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+        navigate("/home");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err.response?.data?.msg || "Invalid credentials. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
-      {/* Glow Lines */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#0f172a_0%,transparent_70%)] opacity-40" />
-
-      {/* Card */}
-      <div className="relative z-10 w-[380px] bg-zinc-900/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-zinc-800">
-        {/* Logo */}
-        <div className="flex justify-center mb-4">
-          <div className="w-12 h-12 rounded-full border-2 border-blue-500 flex items-center justify-center">
-            <div className="w-4 h-4 rounded-full bg-blue-500" />
+    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
+      {/* Premium Background Effects */}
+      <div className="bg-glow" />
+      <div className="bg-glow-accent top-[20%] right-[20%]" />
+      
+      {/* Main Card */}
+      <div className="w-full max-w-md animate-fade-in">
+        {/* Header */}
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600/10 border border-blue-600/20 mb-6 group transition-all duration-500 hover:rotate-6">
+            <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
           </div>
+          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Welcome Back</h1>
+          <p className="text-zinc-500 text-sm font-light">
+            Enter your credentials to access your portal
+          </p>
         </div>
 
-        <h2 className="text-white text-2xl font-semibold text-center">
-          Welcome Back
-        </h2>
-        <p className="text-zinc-400 text-sm text-center mt-1">
-          Don’t have an account?{" "}
-          <Link to={"/register"}>
-            <span className="text-blue-500 cursor-pointer">Sign up</span>
-          </Link>
-        </p>
+        {/* Form Card */}
+        <div className="glass-card rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-indigo-600" />
+          
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 animate-slide-in">
+              <p className="text-red-400 text-sm flex items-center gap-3">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                {error}
+              </p>
+            </div>
+          )}
 
-        {/* Error */}
-        {error && (
-          <p className="text-red-500 text-sm mt-4 text-center">{error}</p>
-        )}
-        {/* sucess */}
-        {success && (
-          <p className="text-green-500 text-sm mt-4 text-center">{success}</p>
-        )}
+          {/* Form */}
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-widest ml-1">
+                Email Address
+              </label>
+              <input
+                type="email"
+                placeholder="name@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-5 py-4 rounded-xl bg-zinc-900/50 border border-white/5 text-white placeholder-zinc-600 focus:border-blue-600 transition-all duration-300"
+                disabled={loading}
+              />
+            </div>
 
-        {/* Form */}
-        <form onSubmit={handleLogin} className="mt-6 space-y-4">
-          <input
-            type="email"
-            placeholder="email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg bg-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-zinc-400 uppercase tracking-widest ml-1">
+                Password
+              </label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-5 py-4 rounded-xl bg-zinc-900/50 border border-white/5 text-white placeholder-zinc-600 focus:border-blue-600 transition-all duration-300"
+                disabled={loading}
+              />
+            </div>
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg bg-zinc-800 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-4 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm tracking-wide shadow-lg shadow-blue-900/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed btn-glow uppercase"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Authenticating...
+                </span>
+              ) : (
+                "Sign In"
+              )}
+            </button>
+          </form>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 transition text-white font-medium disabled:opacity-50"
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
-        </form>
+          {/* Divider */}
+          <div className="flex items-center gap-4 my-8">
+            <div className="flex-1 h-px bg-white/5" />
+            <span className="text-zinc-600 text-[10px] font-bold uppercase tracking-widest">Connect</span>
+            <div className="flex-1 h-px bg-white/5" />
+          </div>
 
-        {/* Divider */}
-        <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-zinc-700" />
-          <span className="text-zinc-500 text-xs">OR</span>
-          <div className="flex-1 h-px bg-zinc-700" />
-        </div>
-
-        {/* Social Buttons */}
-        <div className="flex gap-3">
-          <button className="flex-1 py-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white text-lg">
-            
-          </button>
-          <button className="flex-1 py-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold">
-            G
-          </button>
-          <button className="flex-1 py-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white">
-            𝕏
-          </button>
+          {/* Sign Up Link */}
+          <p className="text-center text-sm text-zinc-500 font-light">
+            New here?{" "}
+            <Link to="/register" className="text-blue-500 hover:text-blue-400 font-semibold transition-colors duration-300">
+              Create account
+            </Link>
+          </p>
         </div>
       </div>
     </div>
   );
 }
+
